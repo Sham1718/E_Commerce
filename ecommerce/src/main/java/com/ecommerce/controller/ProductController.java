@@ -1,4 +1,63 @@
 package com.ecommerce.controller;
 
+import com.ecommerce.dto.ProductDto;
+import com.ecommerce.service.ProductService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/products")
 public class ProductController {
+    private final ProductService service;
+
+    public ProductController(ProductService service) {
+        this.service = service;
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<List<ProductDto>> getAllProduct(){
+        return ResponseEntity.ok(service.getAllProduct());
+    }
+    @PostMapping("/")
+    public ResponseEntity<ProductDto> createProduct(
+            @Valid @RequestBody ProductDto dto
+    ){
+        return ResponseEntity.ok(service.createProduct(dto));
+    }
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductDto> updateProduct(
+            @Valid @RequestBody ProductDto dto,
+            @PathVariable long id
+    ){
+        return ResponseEntity.ok(service.updateProduct(id,dto));
+    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteProduct(
+            @PathVariable long id
+    ){
+        service.deleteProduct(id);
+        return ResponseEntity.ok("product deleted");
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductDto> getById(
+            @PathVariable long id
+    ){
+        return ResponseEntity.ok(service.getProductById(id));
+    }
+    @GetMapping("/category")
+    public ResponseEntity<List<ProductDto>> findByCategory(
+            @RequestParam String category
+    ){
+        return ResponseEntity.ok(service.getProductByCategory(category));
+    }
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductDto>> findByName(
+            @RequestParam String name
+    ){
+        return ResponseEntity.ok(service.searchProductByName(name));
+    }
 }
