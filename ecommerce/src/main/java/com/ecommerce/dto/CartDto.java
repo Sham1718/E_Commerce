@@ -2,6 +2,7 @@ package com.ecommerce.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,7 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CartDto {
-    @NotBlank(message = "product Id is required")
+
+    @NotNull(message = "product Id is required")
     private long productId;
 
     @Min(value = 1, message = "Quantity must be at least 1")
