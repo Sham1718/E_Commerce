@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class ProductDto {
+    private long id;
     @NotBlank(message = "Product name is required")
     private String name;
     @NotBlank(message = "Description is required")

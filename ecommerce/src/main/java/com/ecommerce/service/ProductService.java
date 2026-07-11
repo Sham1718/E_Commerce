@@ -49,7 +49,7 @@ public class ProductService {
     }
 
     public List<ProductDto> getProductByCategory(String category){
-        List<Product> products= repository.FindByCategory(category);
+        List<Product> products= repository.findByCategory(category);
         if (products.isEmpty()){
             throw new ProductNotFound("No products found in category: " + category);
         }
