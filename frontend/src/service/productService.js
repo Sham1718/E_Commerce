@@ -17,7 +17,7 @@ export const updateProduct=(id,product)=>{
 export const deleteProduct=(id)=>{
     return api.delete(`/${id}`)
 }
-export const gsearchProducts=(name)=>{
+export const searchProducts=(name)=>{
     return api.get(`/search?name=${name}`);
 }
 export const  getProductsByCategory=(category)=>{
