@@ -2,7 +2,7 @@ import React, { useEffect, useState }  from "react";
 import { getAllProducts } from "../service/productService";
 import ProductCard from "../components/ProductCard";
 
-const Products = ({products}) => {
+const Products = ({products,setPrev,setNext}) => {
   // const [products, setProducts] = useState([]);
 
   // const productList = async () => {
@@ -51,6 +51,8 @@ const Products = ({products}) => {
           ))}
         </div>
       )}
+      <button onClick={()=>setPrev()}>prev</button>
+      <button onClick={()=>setNext()}>next</button>
     </div>
   );
 };

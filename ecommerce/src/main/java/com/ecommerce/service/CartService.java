@@ -47,10 +47,11 @@ public class CartService {
                 cart ->{
                     CartResponseDto dto=new CartResponseDto();
                     dto.setCartId(cart.getId());
-                    dto.setProductId(cart.getId());
+                    dto.setProductId(cart.getProduct().getId());
                     dto.setProductName(cart.getProduct().getName());
                     dto.setQuantity(cart.getQuantity());
                     dto.setPrice(cart.getProduct().getPrice());
+                    dto.setCategory(cart.getProduct().getCategory());
                     dto.setImageUrl(cart.getProduct().getImageUrl());
                     dto.setSubtotal(cart.getProduct().getPrice()*cart.getQuantity());
                     
@@ -60,6 +61,7 @@ public class CartService {
     }
 
     public CartDto updateQuantity( long productId, CartDto dto){
+        System.out.println(productId);
         Cart cart=findItem(productId);
         cart.setQuantity(dto.getQuantity());
         Cart saved=repository.save(cart);

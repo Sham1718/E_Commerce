@@ -3,6 +3,7 @@ package com.ecommerce.controller;
 import com.ecommerce.dto.ProductDto;
 import com.ecommerce.service.ProductService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,8 +19,11 @@ public class ProductController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<List<ProductDto>> getAllProduct(){
-        return ResponseEntity.ok(service.getAllProduct());
+    public ResponseEntity<Page<ProductDto>> getAllProduct(
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size
+    ){
+        return ResponseEntity.ok(service.getAllProduct(page,size));
     }
     @PostMapping("/")
     public ResponseEntity<ProductDto> createProduct(

@@ -1,10 +1,16 @@
 package com.ecommerce.service;
 
 import com.ecommerce.dto.ProductDto;
+import com.ecommerce.entity.Cart;
 import com.ecommerce.entity.Product;
 import com.ecommerce.exception.ProductNotFound;
+import com.ecommerce.repository.CartRepository;
 import com.ecommerce.repository.ProductRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.querydsl.QPageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,16 +19,18 @@ import java.util.List;
 public class ProductService {
     private final ProductRepository repository;
     private final ModelMapper modelMapper;
+    private final CartRepository cartRepository;
 
-    public ProductService(ProductRepository repository, ModelMapper modelMapper) {
+    public ProductService(ProductRepository repository, ModelMapper modelMapper, CartRepository cartRepository) {
         this.repository = repository;
         this.modelMapper = modelMapper;
+        this.cartRepository = cartRepository;
     }
 
-    public List<ProductDto> getAllProduct(){
-        return repository.findAll().stream().map(
-                product -> modelMapper.map(product,ProductDto.class)
-        ).toList();
+    public Page<ProductDto> getAllProduct(int page, int size){
+        Pageable pageable= PageRequest.of(page, size);
+        Page<Product> products = repository.findAll(pageable);
+        return products.map(product -> modelMapper.map(product,ProductDto.class));
     }
 
     public ProductDto createProduct(ProductDto productDto){
@@ -32,13 +40,25 @@ public class ProductService {
     }
 
     public ProductDto updateProduct(long id, ProductDto productDto){
-        Product product=findProduct(id);
-        modelMapper.map(productDto,product);
-       Product saved= repository.save(product);
-        return modelMapper.map(saved,ProductDto.class);
+        Product product = findProduct(id);
+
+        product.setName(productDto.getName());
+        product.setDescription(productDto.getDescription());
+        product.setPrice(productDto.getPrice());
+        product.setStock(productDto.getStock());
+        product.setCategory(productDto.getCategory());
+        product.setImageUrl(productDto.getImageUrl());
+
+        Product saved = repository.save(product);
+
+        return modelMapper.map(saved, ProductDto.class);
     }
 
     public void deleteProduct(long id){
+        Cart cart=cartRepository.findByProductId(id).orElseThrow(()->new ProductNotFound("product not found"));
+        if (cart!= null){
+            cartRepository.delete(cart);
+        }
         Product product=findProduct(id);
         repository.delete(product);
     }

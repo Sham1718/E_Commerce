@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Products from "./Products";
 
-const Home = ({products}) => {
+const Home = ({products,setPrev,setNext}) => {
  
   return (
     <div className="bg-slate-100 min-h-screen">
@@ -37,7 +37,7 @@ const Home = ({products}) => {
           </p>
         </div>
 
-        <Products  products={products} />
+        <Products  products={products} setPrev={setPrev} setNext={setNext} />
 
       </div>
 

@@ -13,11 +13,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 
 public class ProductDto {
-    private long id;
+    private Long id;
     @NotBlank(message = "Product name is required")
     private String name;
     @NotBlank(message = "Description is required")
-    @Size(min = 5,max = 100)
+    @Size(min = 5,max = 1000)
     private String description;
     @Positive(message = "Price Should be greater than 0")
     private double price;

@@ -14,6 +14,7 @@ public class CartResponseDto {
     private String productName;
     private double price;
     private String imageUrl;
+    private String category;
 
     private int quantity;
 

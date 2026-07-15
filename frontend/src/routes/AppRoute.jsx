@@ -6,11 +6,11 @@ import EditProduct from '../pages/EditProduct'
 import ProductDetails from '../pages/ProductDetails'
 import Cart from '../pages/Cart'
 
-const AppRoute = ({products}) => {
+const AppRoute = ({products,setPrev,setNext}) => {
   return (
    
    <Routes>
-    <Route path='/'  element={<Home products={products} />}/>
+    <Route path='/'  element={<Home products={products} setNext={setNext} setPrev={setPrev} />}/>
     <Route path='/add' element={<AddProduct/>}/>
     <Route path='/edit/:id' element={<EditProduct/>}/>
     <Route path='/product/:id' element={<ProductDetails/>}/>

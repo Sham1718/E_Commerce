@@ -2,8 +2,8 @@ import axios from "axios";
 
 const api = axios.create({baseURL:"http://localhost:8080/products"})
 
-export const getAllProducts=()=>{
-    return api.get("/");
+export const getAllProducts=(page,size=5)=>{
+    return api.get(`/?page=${page} & size=${size}`);
 }
 export const getProductById=(id)=>{
     return api.get(`/${id}`);
