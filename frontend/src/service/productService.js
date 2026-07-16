@@ -17,9 +17,9 @@ export const updateProduct=(id,product)=>{
 export const deleteProduct=(id)=>{
     return api.delete(`/${id}`)
 }
-export const searchProducts=(name)=>{
-    return api.get(`/search?name=${name}`);
+export const searchProducts=(name,page,size=5)=>{
+    return api.get(`/search?name=${name}&page=${page}&size=${size}`);
 }
-export const  getProductsByCategory=(category)=>{
-    return api.get(`/category?category=${category}`)
+export const  getProductsByCategory=(category,page,size=5)=>{
+    return api.get(`/category?category=${category}&page=${page}&size=${size}`)
 }

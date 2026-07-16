@@ -1,16 +1,17 @@
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setSearch ,setCategory} from "../redux/productSlice";
 
 const Navbar = ({
-  search,
-  setSearch,
   handleSearch,
-  category,
-  setCategory,
   handleCategory
 }) => {
-  // useEffect(()=>{handleSearch()},[search])
+  
+  const search=useSelector((state)=>state.product.search);
   const navigate = useNavigate();
+  const dispatch=useDispatch();
+  const category=useSelector((state)=>state.product.category);
   // console.log(search);
   // console.log(category);
 
@@ -35,7 +36,7 @@ const Navbar = ({
             type="text"
             placeholder="Search products..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) =>dispatch( setSearch(e.target.value))}
             className="flex-1 px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
           />
 
@@ -53,7 +54,7 @@ const Navbar = ({
 
           <select
             value={category}
-            onChange={(e) =>{ setCategory(e.target.value); handleCategory(e.target.value) }}
+            onChange={(e) =>{ dispatch(setCategory(e.target.value)); handleCategory(e.target.value) }}
             className="border rounded-lg px-3 py-2 outline-none"
           >
             <option value="">Category</option>

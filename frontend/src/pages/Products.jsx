@@ -1,23 +1,10 @@
 import React, { useEffect, useState }  from "react";
-import { getAllProducts } from "../service/productService";
 import ProductCard from "../components/ProductCard";
+import { useSelector } from "react-redux";
 
-const Products = ({products,setPrev,setNext}) => {
-  // const [products, setProducts] = useState([]);
-
-  // const productList = async () => {
-  //   try {
-  //     const response = await getAllProducts();
-  //     setProducts(response.data);
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   productList();
-  // }, []);
-
+const Products = ({setPrev,setNext}) => {
+  const productsRedux=useSelector((state)=>state.product.products);
+  
   return (
     <div className="max-w-7xl mx-auto px-6 py-10">
 
@@ -31,7 +18,7 @@ const Products = ({products,setPrev,setNext}) => {
         </p>
       </div>
 
-      {products.length === 0 ? (
+      {productsRedux.length === 0 ? (
         <div className="bg-white rounded-xl shadow-md p-10 text-center">
           <h2 className="text-2xl font-semibold text-gray-700">
             No Products Available
@@ -43,7 +30,7 @@ const Products = ({products,setPrev,setNext}) => {
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {products.map((product) => (
+          {productsRedux.map((product) => (
             <ProductCard
               key={product.id}
               product={product}

@@ -68,22 +68,25 @@ public class ProductService {
         return modelMapper.map(p,ProductDto.class);
     }
 
-    public List<ProductDto> getProductByCategory(String category){
-        List<Product> products= repository.findByCategory(category);
-        if (products.isEmpty()){
+    public Page<ProductDto> getProductByCategory(String category, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<Product> products = repository.findByCategory(category, pageable);
+
+        if (products.isEmpty()) {
             throw new ProductNotFound("No products found in category: " + category);
         }
-        return products.stream().map(
-                product -> modelMapper.map(product,ProductDto.class)
-        ).toList();
-    }
 
-    public List<ProductDto> searchProductByName(String name){
-        List<Product> products=repository.findByNameContainingIgnoreCase(name);
+        return products.map(product -> modelMapper.map(product, ProductDto.class));
+    }
+    public List<ProductDto> searchProductByName(String name ,int page,int size){
+        Pageable pageable=PageRequest.of(page,size);
+        Page<Product> products=repository.findByNameContainingIgnoreCase(name,pageable);
         if (products.isEmpty()){
             throw new ProductNotFound("No product found with name: " + name);
         }
-        return products.stream().map(
+        return products.map(
                 product -> modelMapper.map(product,ProductDto.class)
         ).toList();
     }

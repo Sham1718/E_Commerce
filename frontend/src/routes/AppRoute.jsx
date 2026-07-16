@@ -10,7 +10,7 @@ const AppRoute = ({products,setPrev,setNext}) => {
   return (
    
    <Routes>
-    <Route path='/'  element={<Home products={products} setNext={setNext} setPrev={setPrev} />}/>
+    <Route path='/'  element={<Home  setNext={setNext} setPrev={setPrev} />}/>
     <Route path='/add' element={<AddProduct/>}/>
     <Route path='/edit/:id' element={<EditProduct/>}/>
     <Route path='/product/:id' element={<ProductDetails/>}/>

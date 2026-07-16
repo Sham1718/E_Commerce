@@ -37,7 +37,7 @@ const Home = ({products,setPrev,setNext}) => {
           </p>
         </div>
 
-        <Products  products={products} setPrev={setPrev} setNext={setNext} />
+        <Products   setPrev={setPrev} setNext={setNext} />
 
       </div>
 

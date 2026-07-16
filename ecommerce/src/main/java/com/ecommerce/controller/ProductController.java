@@ -53,15 +53,19 @@ public class ProductController {
         return ResponseEntity.ok(service.getProductById(id));
     }
     @GetMapping("/category")
-    public ResponseEntity<List<ProductDto>> findByCategory(
-            @RequestParam String category
+    public ResponseEntity<Page<ProductDto>> findByCategory(
+            @RequestParam String category,
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size
     ){
-        return ResponseEntity.ok(service.getProductByCategory(category));
+        return ResponseEntity.ok(service.getProductByCategory(category,page,size));
     }
     @GetMapping("/search")
     public ResponseEntity<List<ProductDto>> findByName(
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size,
             @RequestParam String name
     ){
-        return ResponseEntity.ok(service.searchProductByName(name));
+        return ResponseEntity.ok(service.searchProductByName(name,page,size));
     }
 }

@@ -1,84 +1,104 @@
-import { useEffect, useEffectEvent, useState } from 'react'
-import Navbar from './components/Navbar'
-import Footer from './components/Footer'
-import AppRoute from './routes/AppRoute'
-import { searchProducts,getProductsByCategory } from './service/productService'
-import { getAllProducts } from './service/productService'
+import { useEffect } from "react";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import AppRoute from "./routes/AppRoute";
+
+import {
+    searchProducts,
+    getProductsByCategory
+} from "./service/productService";
+
+import {
+    fetchProducts,
+    setPage,
+    fetchByName
+} from "./redux/productSlice";
+
+import { useDispatch, useSelector } from "react-redux";
 
 function App() {
-   const [search,setSearch]=useState("");
-  const [category,setCategory]=useState("");
-  const[products,setProducts]=useState([]);
-  const[page,setPage]=useState(0);
-  const[totalPage,setTotalPage]=useState(0);
-  const setPrev=()=>{
-    if(page>0){
-      setPage(page-1);
-    }else{
-      setPage(0);
-    }
-  }
-  const setNext=()=>{
-    if(page<totalPage-1){
-      setPage(page+1);
-      console.log(page);
-    }
-  }
-  const loadProducts=async()=>{
-    try {
-      const res=await getAllProducts(page);
-      console.log(res.data);
-      setTotalPage(res.data.totalPages);
-      
-      setProducts(res.data.content);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-  console.log(totalPage);
-  
 
-  const handleSerach=async()=>{
-    try {
-      if(search.trim()!== ""){
-        const res =await searchProducts(search);
-        setProducts(res.data);
-        console.log(products)
-        return;
-      }
-      const res=await getAllProducts();
-      setProducts(res.data);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-  const handleCategory = async (value) => {
-    setCategory(value);
-    console.log(value);
+    const dispatch = useDispatch();
+    const {
+        search,
+        category,
+        page,
+        totalPages
+    } = useSelector(state => state.product);
 
-    if (value === "") {
-        const res = await getAllProducts();
-        setProducts(res.data);
-        
-    } else {
-        const res = await getProductsByCategory(value);
-        setProducts(res.data);
-        console.log(res.data);
+    const setPrev = () => {
+        if (page > 0) {
+            dispatch(setPage(page - 1));
+        }
+    };
 
-    }
-}; 
-  useEffect(()=>{
-    loadProducts();
-  },[page])
-  return (
+    const setNext = () => {
+        if (page < totalPages - 1) {
+            dispatch(setPage(page + 1));
+        }
+    };
 
-    <>
-    <Navbar search={search} setSearch={setSearch} category={category}
-     setCategory={setCategory} handleSearch={handleSerach} handleCategory={handleCategory}/>
-    <AppRoute products={products} setPrev={setPrev} setNext={setNext}/>
-    <Footer/>
-    </>
-  )
+    const handleSearch =  () => {
+       dispatch(fetchByName(search,page))
+    };
+
+    const handleCategory = async (value) => {
+
+        try {
+
+            if (value === "") {
+
+                dispatch(fetchProducts(page));
+
+            } else {
+
+                const res = await getProductsByCategory(value, page);
+
+                // Temporary until category thunk
+                console.log(res.data);
+
+            }
+
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
+
+        if (search.trim() !== "") {
+
+            handleSearch();
+
+        }
+        else if (category !== "") {
+
+            handleCategory(category);
+
+        }
+        else {
+
+            dispatch(fetchProducts(page));
+
+        }
+
+    }, [page, search, category, dispatch]);
+
+    return (
+        <>
+            <Navbar
+                handleSearch={handleSearch}
+                handleCategory={handleCategory}
+            />
+
+            <AppRoute
+                setPrev={setPrev}
+                setNext={setNext}
+            />
+
+            <Footer />
+        </>
+    );
 }
 
-export default App
+export default App;
