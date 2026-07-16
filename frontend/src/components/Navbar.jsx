@@ -1,89 +1,88 @@
-import React, { useEffect } from "react";
+import React, { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setSearch ,setCategory} from "../redux/productSlice";
+import { setCategory, setPage, setSearch } from "../redux/productSlice";
+import Button from "./Button";
 
-const Navbar = ({
-  handleSearch,
-  handleCategory
-}) => {
-  
-  const search=useSelector((state)=>state.product.search);
+const categories = ["Electronics", "Fashion", "Books", "Furniture", "Sports"];
+
+const Navbar = () => {
   const navigate = useNavigate();
-  const dispatch=useDispatch();
-  const category=useSelector((state)=>state.product.category);
-  // console.log(search);
-  // console.log(category);
+  const dispatch = useDispatch();
+  const { search, category, loading } = useSelector((state) => state.product);
+  const cartCount = useSelector((state) => state.cart.items.reduce((total, item) => total + Number(item.quantity || 0), 0));
+
+  const handleSearchChange = useCallback(
+    (event) => {
+      dispatch(setSearch(event.target.value));
+      dispatch(setPage(0));
+    },
+    [dispatch],
+  );
+
+  const handleCategoryChange = useCallback(
+    (event) => {
+      dispatch(setCategory(event.target.value));
+      dispatch(setPage(0));
+    },
+    [dispatch],
+  );
+
+  const handleLogoClick = useCallback(() => {
+    dispatch(setSearch(""));
+    dispatch(setCategory(""));
+    dispatch(setPage(0));
+    navigate("/");
+  }, [dispatch, navigate]);
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-
-        {/* Logo */}
-        <div
-          onClick={() => navigate("/")}
-          className="cursor-pointer"
-        >
-          <h1 className="text-3xl font-bold text-slate-800">
+    <nav className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:px-6">
+        <button type="button" onClick={handleLogoClick} className="text-left">
+          <h1 className="text-3xl font-bold text-slate-900">
             Shop<span className="text-blue-600">Sphere</span>
           </h1>
-        </div>
+        </button>
 
-        {/* Search */}
-        <div className="flex items-center gap-3 w-1/2">
-
-          <input
-            type="text"
-            placeholder="Search products..."
-            value={search}
-            onChange={(e) =>dispatch( setSearch(e.target.value))}
-            className="flex-1 px-4 py-2 border rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-          />
-
-          <button
-            onClick={handleSearch}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg font-medium transition"
-          >
-            Search
-          </button>
-
-        </div>
-
-        {/* Right */}
-        <div className="flex items-center gap-4">
+        <div className="flex w-full flex-col gap-3 md:flex-row lg:max-w-2xl">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={search}
+              onChange={handleSearchChange}
+              className="w-full rounded-lg border border-slate-300 px-4 py-2.5 pr-12 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            />
+            {loading && search.trim() && (
+              <span className="absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin rounded-full border-2 border-blue-200 border-t-blue-600" />
+            )}
+          </div>
 
           <select
             value={category}
-            onChange={(e) =>{ dispatch(setCategory(e.target.value)); handleCategory(e.target.value) }}
-            className="border rounded-lg px-3 py-2 outline-none"
+            onChange={handleCategoryChange}
+            className="rounded-lg border border-slate-300 px-3 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
           >
-            <option value="">Category</option>
-            <option value="Electronics">Electronics</option>
-            <option value="Fashion">Fashion</option>
-            <option value="Books">Books</option>
-            <option value="Furniture">Furniture</option>
-            <option value="Sports">Sports</option>
+            <option value="">All Categories</option>
+            {categories.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
           </select>
-
-          <button
-            onClick={() => navigate("/add")}
-            className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg font-medium transition"
-          >
-            + Add Product
-          </button>
-
-          <button
-            onClick={() => navigate("/cart")}
-            className="bg-slate-900 hover:bg-black text-white px-5 py-2 rounded-lg font-medium transition"
-          >
-            🛒 Cart
-          </button>
-
         </div>
 
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="success" onClick={() => navigate("/add")}>
+            + Add Product
+          </Button>
+          <Button variant="dark" onClick={() => navigate("/cart")}>
+            Cart ({cartCount})
+          </Button>
+        </div>
       </div>
     </nav>
   );
 };
 
-export default Navbar;
+export default React.memo(Navbar);

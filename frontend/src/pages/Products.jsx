@@ -1,47 +1,98 @@
-import React, { useEffect, useState }  from "react";
+import React, { useCallback, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import EmptyState from "../components/EmptyState";
+import ErrorMessage from "../components/ErrorMessage";
+import Pagination from "../components/Pagination";
 import ProductCard from "../components/ProductCard";
-import { useSelector } from "react-redux";
+import ProductCardSkeleton from "../components/ProductCardSkeleton";
+import { fetchByCategory, fetchByName, fetchProducts, setPage } from "../redux/productSlice";
 
-const Products = ({setPrev,setNext}) => {
-  const productsRedux=useSelector((state)=>state.product.products);
-  
+const Products = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { products, loading, error, page, totalPages, search, category } = useSelector((state) => state.product);
+
+  const emptyContent = useMemo(() => {
+    if (search.trim()) {
+      return {
+        icon: "⌕",
+        title: "No Search Result",
+        message: `No products matched "${search.trim()}". Try a different keyword.`,
+      };
+    }
+
+    if (category) {
+      return {
+        icon: "□",
+        title: "No Products in Category",
+        message: `There are no products listed under ${category} yet.`,
+      };
+    }
+
+    return {
+      icon: "+",
+      title: "No Products Found",
+      message: "Add your first product to start building the catalog.",
+      actionLabel: "Add Product",
+      onAction: () => navigate("/add"),
+    };
+  }, [category, navigate, search]);
+
+  const handlePageChange = useCallback(
+    (nextPage) => {
+      dispatch(setPage(nextPage));
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    },
+    [dispatch],
+  );
+
+  const retry = useCallback(() => {
+    const searchText = search.trim();
+    if (searchText) {
+      dispatch(fetchByName({ search: searchText, page }));
+    } else if (category) {
+      dispatch(fetchByCategory({ category, page }));
+    } else {
+      dispatch(fetchProducts(page));
+    }
+  }, [category, dispatch, page, search]);
+
   return (
-    <div className="max-w-7xl mx-auto px-6 py-10">
-
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-slate-800">
-          Our Products
-        </h2>
-
-        <p className="text-gray-500 mt-2">
-          Browse our latest collection.
-        </p>
-      </div>
-
-      {productsRedux.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-md p-10 text-center">
-          <h2 className="text-2xl font-semibold text-gray-700">
-            No Products Available
-          </h2>
-
-          <p className="text-gray-500 mt-2">
-            Add a product to get started.
+    <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
+      <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-3xl font-bold text-slate-900">Latest Products</h2>
+          <p className="mt-2 text-slate-500">
+            {search.trim() ? `Searching for "${search.trim()}"` : category ? `Showing ${category}` : "Browse our collection of products."}
           </p>
         </div>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {productsRedux.map((product) => (
-            <ProductCard
-              key={product.id}
-              product={product}
-            />
+        {loading && <p className="text-sm font-semibold text-blue-600">Updating products...</p>}
+      </div>
+
+      {error && <ErrorMessage error={error} onRetry={retry} />}
+
+      {loading ? (
+        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {Array.from({ length: 8 }, (_, index) => (
+            <ProductCardSkeleton key={index} />
           ))}
         </div>
+      ) : products.length === 0 && !error ? (
+        <EmptyState {...emptyContent} />
+      ) : (
+        <>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+
+          <Pagination page={page} totalPages={totalPages} onPageChange={handlePageChange} loading={loading} />
+        </>
       )}
-      <button onClick={()=>setPrev()}>prev</button>
-      <button onClick={()=>setNext()}>next</button>
-    </div>
+    </section>
   );
 };
 
-export default Products;
+export default React.memo(Products);

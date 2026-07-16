@@ -1,95 +1,75 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { addToCart } from "../service/cartService";
+import { toast } from "react-toastify";
+import { useDispatch, useSelector } from "react-redux";
+import { addCartItem } from "../redux/cartSlice";
+import Button from "./Button";
 
-const ProductCard = ({ product, onDelete }) => {
+const ProductCard = ({ product }) => {
   const navigate = useNavigate();
-  const handleAddToCart=async(product)=>{
-    const productId=product.id
-    const quantity=1
-    const cartItem={
-      productId,quantity
-    }
-    try {
-      await addToCart(cartItem);
-      alert("added to cart..!")
-    } catch (error) {
-      console.error(error)
-    }
+  const dispatch = useDispatch();
+  const actionLoading = useSelector((state) => state.cart.actionLoading);
+  const inStock = Number(product.stock) > 0;
 
-  }
+  const handleAddToCart = useCallback(async () => {
+    try {
+      await dispatch(addCartItem(product.id)).unwrap();
+      toast.success("Added to Cart");
+    } catch (error) {
+      toast.error(error);
+    }
+  }, [dispatch, product.id]);
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden">
-
-      
-      <div
-        onClick={() => navigate(`/product/${product.id}`)}
-        className="cursor-pointer"
-      >
-      
-        <div className="h-56 bg-gray-100">
+    <article className="group overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-xl">
+      <button type="button" onClick={() => navigate(`/product/${product.id}`)} className="block w-full text-left">
+        <div className="relative h-56 overflow-hidden bg-slate-100">
           <img
             src={product.imageUrl}
             alt={product.name}
-            className="w-full h-full object-cover"
+            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
           />
-        </div>
-
-        {/* Product Details */}
-        <div className="p-5">
-
-          <span className="inline-block px-3 py-1 text-xs font-semibold bg-blue-100 text-blue-700 rounded-full mb-3">
+          <span className="absolute left-3 top-3 rounded-full bg-white/95 px-3 py-1 text-xs font-bold text-slate-700 shadow">
             {product.category}
           </span>
+          <span className="absolute right-3 top-3 rounded-full bg-orange-100 px-3 py-1 text-xs font-bold text-orange-700 shadow">
+            Deal
+          </span>
+        </div>
 
-          <h2 className="text-xl font-bold text-gray-800 line-clamp-1 hover:text-blue-600 transition">
+        <div className="p-5">
+          <h2 className="line-clamp-1 text-lg font-bold text-slate-900 transition group-hover:text-blue-600">
             {product.name}
           </h2>
+          <p className="mt-2 line-clamp-2 min-h-10 text-sm leading-5 text-slate-500">{product.description}</p>
 
-          <p className="text-gray-500 text-sm mt-2 line-clamp-2">
-            {product.description}
-          </p>
-
-          <div className="flex justify-between items-center mt-5">
+          <div className="mt-5 flex items-end justify-between gap-4">
             <div>
-              <p className="text-2xl font-bold text-green-600">
-                ₹{product.price}
-              </p>
-
-              <p
-                className={`text-sm font-medium ${
-                  product.stock > 0
-                    ? "text-green-600"
-                    : "text-red-500"
-                }`}
-              >
-                {product.stock > 0
-                  ? `${product.stock} In Stock`
-                  : "Out of Stock"}
+              <p className="text-2xl font-bold text-green-700">₹{product.price}</p>
+              <p className={`mt-1 text-sm font-semibold ${inStock ? "text-green-700" : "text-red-600"}`}>
+                {inStock ? `${product.stock} in stock` : "Out of stock"}
               </p>
             </div>
+            <span className={`rounded-full px-3 py-1 text-xs font-bold ${inStock ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+              {inStock ? "Available" : "Sold out"}
+            </span>
           </div>
-
         </div>
-      </div>
+      </button>
 
-      {/* Buttons */}
       <div className="p-5 pt-0">
-
-        
-
-        <button
-        onClick={()=>{handleAddToCart(product)}}
-          className="w-full mt-3 bg-gray-900 hover:bg-black text-white py-3 rounded-lg font-semibold transition"
+        <Button
+          variant="dark"
+          className="w-full"
+          onClick={handleAddToCart}
+          disabled={!inStock}
+          isLoading={actionLoading}
         >
           Add to Cart
-        </button>
-
+        </Button>
       </div>
-
-    </div>
+    </article>
   );
 };
 
-export default ProductCard;
+export default React.memo(ProductCard);

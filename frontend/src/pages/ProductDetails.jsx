@@ -1,217 +1,157 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
-import { getProductById,deleteProduct } from "../service/productService";
-import { addToCart } from "../service/cartService";
+import React, { useCallback, useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
+import Button from "../components/Button";
+import ConfirmationModal from "../components/ConfirmationModal";
+import EmptyState from "../components/EmptyState";
+import ErrorMessage from "../components/ErrorMessage";
+import Spinner from "../components/Spinner";
+import { addCartItem } from "../redux/cartSlice";
+import { clearProductDetails, fetchProductDetails, removeProduct } from "../redux/productSlice";
 
 const ProductDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const handleAddToCart=async()=>{
-    const productId=id;
-    const quantity=1;
-    try {
-      const item ={
-        productId,
-        quantity
-      }
-      await addToCart(item);
-      alert("added to cart..!");
-    } catch (error) {
-      
-    }
-  }
-
-  const [product, setProduct] = useState(null);
-
-  const fetchProduct = async () => {
-    try {
-      const response = await getProductById(id);
-      setProduct(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  const onDelete=async()=>{
-    try {
-      await deleteProduct(id);
-      alert("product deleted");
-      navigate("/");
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  const dispatch = useDispatch();
+  const { currentProduct: product, detailsLoading, detailsError, mutationLoading } = useSelector((state) => state.product);
+  const cartLoading = useSelector((state) => state.cart.actionLoading);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   useEffect(() => {
-    fetchProduct();
-  }, []);
+    const request = dispatch(fetchProductDetails(id));
+    return () => {
+      request.abort();
+      dispatch(clearProductDetails());
+    };
+  }, [dispatch, id]);
 
-  if (!product) {
+  const handleAddToCart = useCallback(async () => {
+    try {
+      await dispatch(addCartItem(Number(id))).unwrap();
+      toast.success("Added to Cart");
+    } catch (error) {
+      toast.error(error);
+    }
+  }, [dispatch, id]);
+
+  const handleDelete = useCallback(async () => {
+    try {
+      await dispatch(removeProduct(id)).unwrap();
+      toast.success("Product Deleted");
+      navigate("/");
+    } catch (error) {
+      toast.error(error);
+    }
+  }, [dispatch, id, navigate]);
+
+  if (detailsLoading) {
     return (
-      <div className="min-h-screen flex justify-center items-center text-2xl font-semibold">
-        Loading Product...
-      </div>
+      <main className="min-h-screen bg-slate-100">
+        <Spinner label="Loading product..." className="py-28" />
+      </main>
     );
   }
 
+  if (detailsError) {
+    return (
+      <main className="min-h-screen bg-slate-100 px-4 py-10">
+        <div className="mx-auto max-w-4xl">
+          <ErrorMessage error={detailsError} title="Product details unavailable" onRetry={() => dispatch(fetchProductDetails(id))} />
+        </div>
+      </main>
+    );
+  }
+
+  if (!product) {
+    return (
+      <main className="min-h-screen bg-slate-100 px-4 py-10">
+        <div className="mx-auto max-w-4xl">
+          <EmptyState title="Product Not Found" message="The product may have been removed." actionLabel="Back to Products" onAction={() => navigate("/")} />
+        </div>
+      </main>
+    );
+  }
+
+  const inStock = Number(product.stock) > 0;
+
   return (
-  <div className="min-h-screen bg-gray-100 py-10 px-4">
+    <main className="min-h-screen bg-slate-100 px-4 py-10">
+      <div className="mx-auto max-w-7xl">
+        <nav className="mb-6 text-sm font-medium text-slate-500">
+          <Link to="/" className="hover:text-blue-600">Home</Link>
+          <span className="mx-2">/</span>
+          <span>{product.name}</span>
+        </nav>
 
-    <div className="max-w-7xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
-
-      <div className="grid lg:grid-cols-2">
-
-        {/* Image Section */}
-
-        <div className="bg-gray-50 flex justify-center items-center p-10">
-
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="w-full max-w-md h-112.5 object-contain rounded-xl"
-          />
-
-        </div>
-
-        {/* Details Section */}
-
-        <div className="p-10">
-
-          <span className="inline-block bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-sm font-semibold">
-            {product.category}
-          </span>
-
-          <h1 className="text-4xl font-bold text-gray-800 mt-5">
-            {product.name}
-          </h1>
-
-          {/* Price & Stock */}
-
-          <div className="grid grid-cols-2 gap-5 mt-8">
-
-            <div className="bg-green-50 rounded-xl p-5 border">
-
-              <p className="text-gray-500 text-sm">
-                Price
-              </p>
-
-              <h2 className="text-3xl font-bold text-green-600">
-                ₹ {product.price}
-              </h2>
-
-            </div>
-
-            <div
-              className={`rounded-xl p-5 border ${
-                product.stock > 0
-                  ? "bg-blue-50"
-                  : "bg-red-50"
-              }`}
-            >
-
-              <p className="text-gray-500 text-sm">
-                Stock
-              </p>
-
-              <h2
-                className={`text-2xl font-bold ${
-                  product.stock > 0
-                    ? "text-blue-700"
-                    : "text-red-600"
-                }`}
-              >
-                {product.stock > 0
-                  ? `${product.stock} Available`
-                  : "Out Of Stock"}
-              </h2>
-
-            </div>
-
-          </div>
-
-          {/* Description */}
-
-          <div className="mt-8">
-
-            <h3 className="text-xl font-semibold mb-3">
-              Description
-            </h3>
-
-            <div className="bg-gray-50 border rounded-xl p-5 leading-8 text-gray-700">
-              {product.description}
-            </div>
-
-          </div>
-
-          {/* Extra Information */}
-
-          <div className="grid grid-cols-2 gap-5 mt-8">
-
-            <div className="bg-gray-50 border rounded-xl p-4">
-              <p className="text-gray-500 text-sm">
-                Product ID
-              </p>
-
-              <p className="font-semibold">
-                #{product.id}
-              </p>
-            </div>
-
-            {product.createdAt && (
-              <div className="bg-gray-50 border rounded-xl p-4">
-                <p className="text-gray-500 text-sm">
-                  Added On
-                </p>
-
-                <p className="font-semibold">
-                  {new Date(product.createdAt).toLocaleDateString()}
-                </p>
+        <section className="overflow-hidden rounded-lg bg-white shadow-lg">
+          <div className="grid lg:grid-cols-2">
+            <div className="bg-slate-50 p-6 sm:p-10">
+              <div className="flex min-h-96 items-center justify-center rounded-lg border border-slate-200 bg-white p-4">
+                <img src={product.imageUrl} alt={product.name} className="max-h-96 w-full object-contain" />
               </div>
-            )}
+              <div className="mt-4 grid grid-cols-4 gap-3">
+                {Array.from({ length: 4 }, (_, index) => (
+                  <div key={index} className="aspect-square rounded-lg border border-slate-200 bg-white p-2">
+                    <img src={product.imageUrl} alt={`${product.name} view ${index + 1}`} className="h-full w-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            </div>
 
+            <div className="p-6 sm:p-10">
+              <div className="flex flex-wrap gap-3">
+                <span className="rounded-full bg-blue-100 px-4 py-1 text-sm font-bold text-blue-700">{product.category}</span>
+                <span className={`rounded-full px-4 py-1 text-sm font-bold ${inStock ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+                  {inStock ? "Available" : "Out of Stock"}
+                </span>
+              </div>
+
+              <h1 className="mt-5 text-4xl font-bold text-slate-900">{product.name}</h1>
+              <p className="mt-4 text-3xl font-bold text-green-700">₹{product.price}</p>
+              <p className="mt-6 leading-8 text-slate-600">{product.description}</p>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm text-slate-500">Stock</p>
+                  <p className="mt-1 text-xl font-bold text-slate-900">{inStock ? `${product.stock} available` : "Out of stock"}</p>
+                </div>
+                <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-sm text-slate-500">Product ID</p>
+                  <p className="mt-1 text-xl font-bold text-slate-900">#{product.id}</p>
+                </div>
+              </div>
+
+              <div className="mt-10 grid gap-3 sm:grid-cols-2">
+                <Button variant="dark" onClick={handleAddToCart} disabled={!inStock} isLoading={cartLoading}>
+                  Add To Cart
+                </Button>
+                <Button variant="warning" onClick={() => navigate(`/edit/${product.id}`)}>
+                  Edit Product
+                </Button>
+                <Button variant="danger" onClick={() => setConfirmDelete(true)} isLoading={mutationLoading}>
+                  Delete Product
+                </Button>
+                <Button variant="secondary" onClick={() => navigate(-1)}>
+                  Back
+                </Button>
+              </div>
+            </div>
           </div>
-
-          {/* Buttons */}
-
-          <div className="grid grid-cols-2 gap-4 mt-10">
-
-            <button
-              onClick={handleAddToCart}
-              className="bg-black hover:bg-gray-800 text-white py-3 rounded-lg font-semibold transition"
-            >
-              Add To Cart
-            </button>
-
-            <button
-              onClick={() => navigate(`/edit/${product.id}`)}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-lg font-semibold transition"
-            >
-              Edit
-            </button>
-
-            <button
-              onClick={onDelete}
-              className="bg-red-500 hover:bg-red-600 text-white py-3 rounded-lg font-semibold transition"
-            >
-              Delete
-            </button>
-
-            <button
-              onClick={() => navigate(-1)}
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 py-3 rounded-lg font-semibold transition"
-            >
-              Back
-            </button>
-
-          </div>
-
-        </div>
-
+        </section>
       </div>
 
-    </div>
-
-  </div>
-);
+      <ConfirmationModal
+        open={confirmDelete}
+        title="Are you sure?"
+        message="This product will be permanently deleted."
+        confirmLabel="Delete"
+        isLoading={mutationLoading}
+        onCancel={() => setConfirmDelete(false)}
+        onConfirm={handleDelete}
+      />
+    </main>
+  );
 };
 
-export default ProductDetails;
+export default React.memo(ProductDetails);
