@@ -54,12 +54,12 @@ public class ProductService {
         return modelMapper.map(saved, ProductDto.class);
     }
 
-    public void deleteProduct(long id){
-        Cart cart=cartRepository.findByProductId(id).orElseThrow(()->new ProductNotFound("product not found"));
-        if (cart!= null){
-            cartRepository.delete(cart);
-        }
-        Product product=findProduct(id);
+    public void deleteProduct(long id) {
+
+        cartRepository.findByProductId(id)
+                .ifPresent(cartRepository::delete);
+
+        Product product = findProduct(id);
         repository.delete(product);
     }
 
@@ -80,7 +80,7 @@ public class ProductService {
 
         return products.map(product -> modelMapper.map(product, ProductDto.class));
     }
-    public List<ProductDto> searchProductByName(String name ,int page,int size){
+    public Page<ProductDto> searchProductByName(String name ,int page,int size){
         Pageable pageable=PageRequest.of(page,size);
         Page<Product> products=repository.findByNameContainingIgnoreCase(name,pageable);
         if (products.isEmpty()){
@@ -88,7 +88,7 @@ public class ProductService {
         }
         return products.map(
                 product -> modelMapper.map(product,ProductDto.class)
-        ).toList();
+        );
     }
 
     private Product findProduct(long id){

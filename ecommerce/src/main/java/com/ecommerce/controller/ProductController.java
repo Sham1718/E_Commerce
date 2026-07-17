@@ -61,7 +61,7 @@ public class ProductController {
         return ResponseEntity.ok(service.getProductByCategory(category,page,size));
     }
     @GetMapping("/search")
-    public ResponseEntity<List<ProductDto>> findByName(
+    public ResponseEntity<Page<ProductDto>> findByName(
             @RequestParam(defaultValue="0") int page,
             @RequestParam(defaultValue="10") int size,
             @RequestParam String name
