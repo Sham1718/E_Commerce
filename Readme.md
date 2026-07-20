@@ -218,18 +218,6 @@ http://localhost:5173
 
 ---
 
-#  Application Modules
-
-- Home
-- Products
-- Product Details
-- Add Product
-- Edit Product
-- Shopping Cart
-- Pagination
-- Responsive Navigation
-
----
 
 #  Learning Outcomes
 
