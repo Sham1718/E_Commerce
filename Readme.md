@@ -260,7 +260,7 @@ This project helped strengthen practical knowledge of:
 
  Email: **sbharaskar8485@gmail.com**
 
- Portfolio: **https://shyam-neon.vercel.app**
+ Portfolio: **https://shyambharaskar.vercel.app/**
 
  GitHub: **https://github.com/Sham1718**
 
