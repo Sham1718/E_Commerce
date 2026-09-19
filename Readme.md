@@ -219,40 +219,6 @@ http://localhost:5173
 ---
 
 
-#  Learning Outcomes
-
-This project helped strengthen practical knowledge of:
-
-- Spring Boot REST APIs
-- Spring Data JPA
-- Hibernate ORM
-- React Component Architecture
-- Redux Toolkit
-- Async State Management
-- API Integration using Axios
-- Layered Backend Architecture
-- DTO Mapping using ModelMapper
-- Exception Handling
-- MySQL Database Design
-- Responsive UI Development
-
----
-
-#  Future Improvements
-
-- JWT Authentication
-- User Login & Registration
-- Role-Based Access Control
-- Order Management
-- Payment Gateway Integration
-- Wishlist
-- Product Categories
-- Product Search & Filters
-- Image Upload
-- Docker Deployment
-- Cloud Deployment
-
----
 
 #  Author
 
